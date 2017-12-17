@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
+	<title>上传文件</title>
+</head>
+<body>
+    <center>
+    <br>
+    <h1>上传文件</h1>
+    <br>
+
+
+    <input id="file" type="file" style="display: none;">
+    <button id="upload" type="button" class="btn btn-info">上传文件</button>
+    <br>
+    <br>
+    <br>
+    <br>
+    <h1><span id="show"></span></h1>
+    </center>
+</body>
+<script type="text/javascript">
+	function uploadFile(){
+
+	    var name=$("#file")[0].files[0].name.split('\\').pop();
+	    var formData=new FormData();
+	    formData.append("file_name",name);
+	    formData.append("file",$("#file")[0].files[0]);
+	    var xhr = new XMLHttpRequest();
+	    xhr.open('POST','./cgi/upload.py');
+	    xhr.onload = function () {
+	        if (xhr.status === 200) {
+	        	$("#show").html(xhr.responseText)
+	        }
+	    };
+	    xhr.send(formData);
+	}
+	$(document).ready(function(){
+	    $("#file").change(function(){
+	        uploadFile();
+	    });
+	    $("#upload").click(function(){
+            $("#file").trigger('click');
+	    });
+	});
+</script>
+</html>

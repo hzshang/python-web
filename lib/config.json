@@ -1,0 +1,8 @@
+{
+	"listen_address":"0.0.0.0",
+	"port":1234,
+	"pool":30,
+	"root":"www",
+	"index":["index.html","index.py","index.htm"],
+	"time_out":30
+}
