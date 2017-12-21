@@ -35,19 +35,14 @@ class Server(object):
                 t.start()
 
     def __handle_connection(self, sock, address):
-        try:
-            while True:
-                sock.setblocking(0)
-                # 超时自动断开
-                ready = select.select([sock], [], [], self.time_out)
-                if not ready[0]:
-                    break
+        while True:
+            try:
                 re = request(self.root, self.index)
                 re.process_data(sock)
                 payload = re.get_response()
                 sock.send(payload)
-            sock.close()
-        except Exception as e:
-            traceback.print_exc()
-            sock.close()
+            except Exception as e:
+                traceback.print_exc()
+                sock.close()
+                break
         print "disconnect from %s: %s\n" % address

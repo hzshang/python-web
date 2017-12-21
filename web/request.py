@@ -4,6 +4,7 @@ from functions import *
 from os import path
 import magic
 from www.cgi import cgi
+import traceback
 
 class request(object):
     """request context"""
@@ -35,6 +36,7 @@ class request(object):
                 self.body={}
             self.__locate_request_file()
         except Exception as e:
+            traceback.print_exc()
             self.request_header = {
                 "type": "GET",
                 "path": BAD_REQUEST_PATH,
@@ -45,7 +47,7 @@ class request(object):
 
     # 解析请求的文件地址
     def __locate_request_file(self):
-        tmp = self.root + "/" + self.request_header["path"]
+        tmp = self.root + "/" + self.request_header["path"].decode('utf-8')
         if path.exists(tmp):
             if path.isfile(tmp):
                 self.status = 200
@@ -77,20 +79,21 @@ class request(object):
             content=self.__get_content()
 
         buf.append(dic[self.status])
-        buf.append("server: python-web")
+        buf.append("Server: python-web")
+        accept_encoding=[i[0] for i in self.request_header["accept-encoding"]];
         # comp 压缩函数
-        if "deflate" in self.request_header["accept-encoding"]:
+        if "deflate" in accept_encoding:
             comp = deflate
-            buf.append("content-encoding: deflate")
-        elif "gzip" in self.request_header["accept-encoding"]:
+            buf.append("Content-Encoding: deflate")
+        elif "gzip" in accept_encoding:
             comp = gzip
-            buf.append("content-encoding: gzip")
+            buf.append("Content-Encoding: gzip")
         else:
             comp = lambda x: x
 
         compressed=comp(content)
-        buf.append("content-type: %s" % self.__get_content_type())
-        buf.append("content-length: %d" % len(compressed))
+        buf.append("Content-Type: %s" % self.__get_content_type())
+        buf.append("Content-Length: %d" % len(compressed))
         header = "\r\n".join(buf) + "\r\n\r\n"
         print header
         return header + compressed
@@ -104,6 +107,7 @@ class request(object):
             try:
                 data = cgi.map()[func](self.__get_params(), self.__post_params())
             except  Exception as e:
+                traceback.print_exc()
                 data = None
         else:
             with open(tmp_path) as f:

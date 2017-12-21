@@ -1,7 +1,10 @@
 # coding = utf-8
+from const import *
 def main(get,post):
-    file_name=post["file_name"].replace("./","")
+    name=post["name"].decode("utf-8")
     file=post["file"]
-    with open("www/tmp/"+file_name,"w+") as f:
+    dir=post["dir"]
+    real_path= join(ABS_WWW,dir,name)
+    with open (real_path,"w+") as f:
         f.write(file)
-    print '<a href="/tmp/%s">file saved in tmp/%s</a>'%(file_name,file_name)
+

@@ -1,3 +1,5 @@
+.idea*
 *.pyc
 *.sublime*
 *DS_Store
+

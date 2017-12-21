@@ -28,6 +28,7 @@ def map():
     files = [x[:-3] for x in files if x[-3:] == ".py"]
     for i in files:
         tmp = importlib.import_module("www.cgi."+i)
+        reload(tmp)
         func=getattr(tmp, "main")
         dir[i]=dup(func)
     return dir

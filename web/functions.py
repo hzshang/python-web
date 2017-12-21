@@ -1,8 +1,21 @@
-# -*- coding: utf-8 -*-
+# coding=utf8
 import StringIO
 import gzip
 import zlib
 import os
+
+import re
+
+urldecoder = re.compile('%([0-9a-fA-F]{2})')
+
+def urldecode(s):
+    bs = bytearray(s)
+    offset = 0
+    for encoded in urldecoder.finditer(s):
+        start, end = encoded.span()
+        bs[start + offset:end + offset] = chr(int(encoded.group(1), 16))
+        offset += (start - end + 1)
+    return str(bs)
 
 
 # gzip 压缩
@@ -28,6 +41,7 @@ def dic2title(dic):
 
 # 解析GET参数
 def parase_params(str):
+    str = urldecode(str)
     array = str.split('&')
     dic = {}
     for i in array:
@@ -39,7 +53,6 @@ def parase_params(str):
 # 解析header数组
 def parase_array(str):
     array = str.replace(" ", "").split(',')
-
     def sharp(str):
         index = str.find(';')
         if index != -1:
@@ -60,7 +73,7 @@ def parase_header(header):
     array = header.split('\n')
     dic = {}
     first_line = array[0]
-    url = first_line.split(' ')
+    url = urldecode(first_line).split(' ')
     dic["type"] = url[0]
     # 解析参数
     if dic["type"] == "GET" or dic["type"] == "POST":
@@ -71,9 +84,9 @@ def parase_header(header):
             dic["get_params"] = parase_params(tmp[tmp_index + 1:])
         else:
             dic["path"] = tmp
-            dic["get_params"]={}
+            dic["get_params"] = {}
     else:
-        raise Exception( dic["type"]+'Method Not Support')
+        print dic["type"]
 
     for i in array[1:]:
         if i != '':
@@ -92,30 +105,38 @@ def parase_header(header):
     # 解析Content-Type
     if "content-type" in dic:
         dic["content-type"] = parase_array(dic["content-type"])
-    elif dic["type"] == "POST":
-        raise Exception('POST Not Boundary')
     return dic
 
 
 # 解析POST的body内容
 def parase_body(body, boundary):
-    body = body.replace("--" + boundary + "--\r\n", "")
-    array = body.split("--" + boundary)
-    dic={}
-    def get_post_params(item):
-        pos = item.find("\r\n\r\n")
-        value = item[pos + 4:]
-        header = item[:pos]
-        name_pos=header.find("name=")+6;
-        name_end=header.find("\"",name_pos);
-        name=header[name_pos:name_end];
-        dic[name]=value
+    if boundary not in body:
+        body = urldecode(body)
+        dic = parase_params(body)
+    else:
+        body = body.replace("--" + boundary + "--\r\n", "")
+        array = body.split("--" + boundary)
+        dic = {}
 
-    for item in array:
-        if item == "":
-            continue
-        get_post_params(item[2:-2])
+        def get_post_params(item):
+            pos = item.find("\r\n\r\n")
+            value = item[pos + 4:]
+            header = item[:pos]
+            name_pos = header.find("name=") + 6;
+            name_end = header.find("\"", name_pos);
+            name = header[name_pos:name_end];
+            dic[name] = value
+
+        for item in array:
+            if item == "":
+                continue
+            get_post_params(item[2:-2])
+
     return dic
+
 
 def get_extenstion(file):
     return os.path.splitext(file)[1]
+
+
+
