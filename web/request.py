@@ -47,7 +47,11 @@ class request(object):
 
     # 解析请求的文件地址
     def __locate_request_file(self):
-        tmp = self.root + "/" + self.request_header["path"].decode('utf-8')
+        try:
+            tmp = self.root + "/" + self.request_header["path"]
+        except Exception as e:
+            print self.request_header
+
         if path.exists(tmp):
             if path.isfile(tmp):
                 self.status = 200
@@ -70,12 +74,13 @@ class request(object):
         dic = {
             200: GOOD_REQUEST,
             400: BAD_REQUEST,
-            404: NOT_FOUND
+            404: NOT_FOUND,
+            500: SERVER_ERROR,
         }
         content = self.__get_content()
         if content == None:
-            self.status=400
-            self.request_header["path"]=BAD_REQUEST_PATH
+            self.status=500
+            self.request_header["path"]=ERROR_REQUEST_PATH
             content=self.__get_content()
 
         buf.append(dic[self.status])
@@ -107,7 +112,7 @@ class request(object):
             try:
                 data = cgi.map()[func](self.__get_params(), self.__post_params())
             except  Exception as e:
-                traceback.print_exc()
+                # traceback.print_exc()
                 data = None
         else:
             with open(tmp_path) as f:

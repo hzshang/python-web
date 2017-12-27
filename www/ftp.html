@@ -37,9 +37,9 @@
                 <button id="mkdir" type="button" class="btn btn-success">创建文件夹</button>
             </div>
         </div>
-
+        <br>
         <div class="row" id="mkdirContainer" style="display: none;">
-            <br>
+
             <div class="col-md-4">
                 <input type="text" id="input" class="form-control" placeholder="文件夹">
             </div>
@@ -164,7 +164,7 @@ function uploadFile(){
     if (event.lengthComputable) {
         var valeur= (event.loaded / event.total * 100 | 0);
         $('#fileProgress').css('width', valeur+'%').attr('aria-valuenow', valeur);
-        $('#fileProgress').html(name+":"+valeur+'%');
+        $('#fileProgress').html(name);
     }};
 
     xhr.send(formData);

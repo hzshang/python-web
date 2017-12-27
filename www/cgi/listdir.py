@@ -11,10 +11,10 @@ def main(get, post):
     relative_path = get["dir"]
 
     #相对于/www的路径，用于下载文件
-    www_path=WWW+relative_path
+    www_path=(WWW+relative_path)
 
     #相对于/ 的绝对路径,用于程序操作
-    real_path = ABS + www_path
+    real_path = (ABS + www_path)
 
     array = os.listdir(real_path)
     dirs = [x for x in array if os.path.isdir(join(real_path,x))]

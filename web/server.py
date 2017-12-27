@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 import threading
 import socket
-import traceback
-
 from request import request
-import select
+
 
 
 class Server(object):
@@ -14,7 +12,7 @@ class Server(object):
         self.address = data['listen_address']
         self.port = data['port']
         self.threadPool = data['pool']
-        self.root = data['root']
+        self.root = 'www'
         self.index = data['index']
         self.time_out = data['time_out']
 
@@ -42,7 +40,6 @@ class Server(object):
                 payload = re.get_response()
                 sock.send(payload)
             except Exception as e:
-                traceback.print_exc()
                 sock.close()
                 break
         print "disconnect from %s: %s\n" % address
